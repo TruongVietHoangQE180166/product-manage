@@ -186,26 +186,39 @@ export class ProductController {
   }
 
   @Get('list')
-  async findAll(@Query('page') page: number, @Query('limit') limit: number) {
-    try {
-      if (!page || !limit) {
-        throw new Error('Page and limit are required');
-      }
-      const result = await this.productService.findAll(+page, +limit);
-      return {
-        method: 'GET_ALL',
-        data: result,
-      };
-    } catch (error) {
-      throw new BadRequestException({
-        method: 'GET_ALL',
-        error: {
-          status: 400,
-          message: error.message,
-        },
-      });
+async findAll(
+  @Query('page') page?: string,
+  @Query('limit') limit?: string,
+  @Query('search') search?: string,
+) {
+  try {
+    const pageNum = parseInt(page || '1', 10);    
+    const limitNum = parseInt(limit || '4', 10);  
+
+    if (isNaN(pageNum) || pageNum < 1) {
+      throw new BadRequestException('Page must be a positive integer');
     }
+
+    if (isNaN(limitNum) || limitNum < 1 || limitNum > 100) {
+      throw new BadRequestException('Limit must be between 1 and 100');
+    }
+
+    const result = await this.productService.findAll(pageNum, limitNum, search);
+    return {
+      method: 'GET_ALL',
+      data: result,
+    };
+  } catch (error) {
+    throw new BadRequestException({
+      method: 'GET_ALL',
+      error: {
+        status: 400,
+        message: error.message || 'Invalid query parameters',
+      },
+    });
   }
+}
+
 
   @Get('detail/:id')
   async findOne(@Param('id') id: string) {

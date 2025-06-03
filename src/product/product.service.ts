@@ -67,26 +67,28 @@ export class ProductService {
     }
   }
 
-  async findAll(
-    page: number,
-    limit: number,
-  ): Promise<{ data: Product[]; total: number }> {
-    if (!Number.isInteger(page) || page < 1) {
-      throw new BadRequestException('Page must be a positive integer');
-    }
-    if (!Number.isInteger(limit) || limit < 1) {
-      throw new BadRequestException('Limit must be a positive integer');
-    }
+  async findAll(page: number = 1, limit: number = 4, search?: string): Promise<{ data: Product[]; total: number }> {
+  if (!Number.isInteger(page) || page < 1) {
+    throw new BadRequestException('Page must be a positive integer');
+  }
+  if (!Number.isInteger(limit) || limit < 1 || limit > 100) {
+    throw new BadRequestException('Limit must be a positive integer and not exceed 100');
+  }
 
+  try {
     const skip = (page - 1) * limit;
+    const query = search && search.trim() ? { name: { $regex: search, $options: 'i' } } : {};
 
     const [data, total] = await Promise.all([
-      this.productModel.find().skip(skip).limit(limit).exec(),
-      this.productModel.countDocuments(),
+      this.productModel.find(query).skip(skip).limit(limit).exec(),
+      this.productModel.countDocuments(query),
     ]);
 
     return { data, total };
+  } catch (error) {
+    throw new BadRequestException('Failed to fetch products');
   }
+}
 
   async findOne(id: number): Promise<Product> {
     if (!Number.isInteger(id) || id < 1) {
