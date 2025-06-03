@@ -9,11 +9,11 @@ import { Product, ProductSchema } from './schemas/product.schema';
   imports: [
     MongooseModule.forFeature([{ name: Product.name, schema: ProductSchema }]),
     MulterModule.register({
-      dest: './uploads', // Thư mục lưu trữ ảnh cục bộ
+      dest: './uploads', 
     }),
   ],
   controllers: [ProductController],
   providers: [ProductService],
-  exports: [ProductService], // Chỉ xuất ProductService nếu cần
+  exports: [ProductService], 
 })
 export class ProductModule {}

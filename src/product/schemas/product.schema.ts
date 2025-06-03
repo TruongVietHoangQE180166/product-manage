@@ -25,7 +25,7 @@ export class Product extends Document {
   isActive: boolean;
 
   @Prop({ type: String, required: false })
-  image?: string; // Lưu URL của ảnh
+  image?: string; 
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product);

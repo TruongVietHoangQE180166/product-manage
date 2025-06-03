@@ -18,7 +18,7 @@ export class ProductService {
 
   async create(createDto: CreateProductDto): Promise<Product> {
     if (!createDto.id) {
-      throw new BadRequestException('Mã sản phẩm là bắt buộc');
+      throw new BadRequestException('Product ID is required');
     }
 
     const existingProduct = await this.productModel.findOne({
@@ -26,7 +26,7 @@ export class ProductService {
     });
 
     if (existingProduct) {
-      throw new BadRequestException('Sản phẩm với mã này đã tồn tại');
+      throw new BadRequestException('A product with this ID already exists');
     }
 
     const newProduct = new this.productModel({
@@ -47,7 +47,7 @@ export class ProductService {
     const product = await this.productModel.findOne({ id });
 
     if (!product) {
-      throw new NotFoundException(`Sản phẩm với ID ${id} không tồn tại`);
+      throw new NotFoundException(`Product with ID ${id} does not exist`);
     }
 
     return await this.productModel
@@ -63,7 +63,7 @@ export class ProductService {
     const result = await this.productModel.deleteOne({ id }).exec();
 
     if (result.deletedCount === 0) {
-      throw new NotFoundException(`Sản phẩm với ID ${id} không tồn tại`);
+      throw new NotFoundException(`Product with ID ${id} does not exist`);
     }
   }
 
@@ -72,10 +72,10 @@ export class ProductService {
     limit: number,
   ): Promise<{ data: Product[]; total: number }> {
     if (!Number.isInteger(page) || page < 1) {
-      throw new BadRequestException('Page phải là số nguyên dương');
+      throw new BadRequestException('Page must be a positive integer');
     }
     if (!Number.isInteger(limit) || limit < 1) {
-      throw new BadRequestException('Limit phải là số nguyên dương');
+      throw new BadRequestException('Limit must be a positive integer');
     }
 
     const skip = (page - 1) * limit;
@@ -90,13 +90,13 @@ export class ProductService {
 
   async findOne(id: number): Promise<Product> {
     if (!Number.isInteger(id) || id < 1) {
-      throw new BadRequestException('ID phải là số nguyên dương');
+      throw new BadRequestException('ID must be a positive integer');
     }
 
     const product = await this.productModel.findOne({ id }).exec();
 
     if (!product) {
-      throw new NotFoundException(`Sản phẩm với ID ${id} không tồn tại`);
+      throw new NotFoundException(`Product with ID ${id} does not exist`);
     }
 
     return product;

@@ -32,5 +32,5 @@ export class UpdateProductDto {
 
   @IsOptional()
   @IsString({ message: 'Image must be a string (URL)' })
-  image?: string; // URL của ảnh
+  image?: string; 
 }

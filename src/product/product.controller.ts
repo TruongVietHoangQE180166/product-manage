@@ -36,11 +36,11 @@ export class ProductController {
       fileFilter: (req, file, cb) => {
         const allowedTypes = ['image/png', 'image/jpeg', 'image/gif'];
         if (!allowedTypes.includes(file.mimetype)) {
-          return cb(new BadRequestException('Chỉ được phép tải lên file PNG, JPEG hoặc GIF'), false);
+          return cb(new BadRequestException('Only PNG, JPEG, or GIF files are allowed'), false);
         }
         cb(null, true);
       },
-      limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+      limits: { fileSize: 5 * 1024 * 1024 },
     }),
   )
   async create(
@@ -61,19 +61,19 @@ export class ProductController {
       };
 
       if (!createProductDto.id || isNaN(createProductDto.id)) {
-        throw new BadRequestException('Mã sản phẩm là bắt buộc và phải là số');
+        throw new BadRequestException('Product ID is required and must be a number');
       }
       if (!createProductDto.name) {
-        throw new BadRequestException('Tên sản phẩm là bắt buộc');
+        throw new BadRequestException('Product name is required');
       }
       if (!createProductDto.price || isNaN(createProductDto.price)) {
-        throw new BadRequestException('Giá sản phẩm là bắt buộc và phải là số');
+        throw new BadRequestException('Product price is required and must be a number');
       }
       if (!createProductDto.description) {
-        throw new BadRequestException('Mô tả sản phẩm là bắt buộc');
+        throw new BadRequestException('Product description is required');
       }
       if (!createProductDto.category) {
-        throw new BadRequestException('Danh mục sản phẩm là bắt buộc');
+        throw new BadRequestException('Product category is required');
       }
 
       if (file) {
@@ -87,7 +87,6 @@ export class ProductController {
         data,
       };
     } catch (error) {
-      // Xóa ảnh nếu tạo thất bại
       if (imagePath && fs.existsSync(imagePath)) {
         fs.unlinkSync(imagePath);
       }
@@ -115,7 +114,7 @@ export class ProductController {
       fileFilter: (req, file, cb) => {
         const allowedTypes = ['image/png', 'image/jpeg', 'image/gif'];
         if (!allowedTypes.includes(file.mimetype)) {
-          return cb(new BadRequestException('Chỉ được phép tải lên file PNG, JPEG hoặc GIF'), false);
+          return cb(new BadRequestException('Only PNG, JPEG, or GIF files are allowed'), false);
         }
         cb(null, true);
       },
@@ -140,16 +139,16 @@ export class ProductController {
       };
 
       if (!updateProductDto.name) {
-        throw new BadRequestException('Tên sản phẩm là bắt buộc');
+        throw new BadRequestException('Product name is required');
       }
       if (!updateProductDto.price || isNaN(updateProductDto.price)) {
-        throw new BadRequestException('Giá sản phẩm là bắt buộc và phải là số');
+        throw new BadRequestException('Product price is required and must be a number');
       }
       if (!updateProductDto.description) {
-        throw new BadRequestException('Mô tả sản phẩm là bắt buộc');
+        throw new BadRequestException('Product description is required');
       }
       if (!updateProductDto.category) {
-        throw new BadRequestException('Danh mục sản phẩm là bắt buộc');
+        throw new BadRequestException('Product category is required');
       }
 
       if (file) {
@@ -157,16 +156,13 @@ export class ProductController {
         updateProductDto.image = `/uploads/${file.filename}`;
       }
 
-      // Lấy sản phẩm hiện tại để lưu đường dẫn ảnh cũ
       const existingProduct = await this.productService.findOne(+id);
       const oldImagePath = existingProduct.image
         ? join(__dirname, '..', '..', existingProduct.image)
         : undefined;
 
-      // Cập nhật sản phẩm
       const data = await this.productService.update(+id, updateProductDto);
 
-      // Xóa ảnh cũ nếu cập nhật thành công và có ảnh mới
       if (file && oldImagePath && fs.existsSync(oldImagePath)) {
         fs.unlinkSync(oldImagePath);
       }
@@ -176,7 +172,6 @@ export class ProductController {
         data,
       };
     } catch (error) {
-      // Xóa ảnh mới nếu cập nhật thất bại
       if (newImagePath && fs.existsSync(newImagePath)) {
         fs.unlinkSync(newImagePath);
       }
@@ -194,7 +189,7 @@ export class ProductController {
   async findAll(@Query('page') page: number, @Query('limit') limit: number) {
     try {
       if (!page || !limit) {
-        throw new Error('Page và limit là bắt buộc');
+        throw new Error('Page and limit are required');
       }
       const result = await this.productService.findAll(+page, +limit);
       return {
@@ -234,23 +229,20 @@ export class ProductController {
   @Delete('delete/:id')
   async remove(@Param('id') id: string) {
     try {
-      // Lấy sản phẩm để kiểm tra ảnh
       const product = await this.productService.findOne(+id);
       const imagePath = product.image
         ? join(__dirname, '..', '..', product.image)
         : undefined;
 
-      // Xóa sản phẩm
       await this.productService.remove(+id);
 
-      // Xóa ảnh nếu tồn tại
       if (imagePath && fs.existsSync(imagePath)) {
         fs.unlinkSync(imagePath);
       }
 
       return {
         method: 'DELETE',
-        data: { message: `Sản phẩm với ID ${id} đã được xóa thành công` },
+        data: { message: `Product with ID ${id} has been deleted successfully` },
       };
     } catch (error) {
       throw new BadRequestException({
