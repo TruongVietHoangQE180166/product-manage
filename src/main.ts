@@ -14,7 +14,7 @@ async function bootstrap() {
 
   // Bật CORS cho frontend tại port 5173
   app.enableCors({
-    origin: 'http://localhost:5173',
+    origin: 'https://product-ui-6x9o.onrender.com',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
