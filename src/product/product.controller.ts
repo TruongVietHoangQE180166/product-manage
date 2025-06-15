@@ -9,6 +9,7 @@ import {
   BadRequestException,
   UseInterceptors,
   UploadedFile,
+  UseGuards,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
@@ -17,12 +18,13 @@ import * as fs from 'fs';
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-
+import { AuthGuard } from 'src/guard/auth.guard';
 @Controller('products')
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
   @Post('create')
+  @UseGuards(AuthGuard)
   @UseInterceptors(
     FileInterceptor('image', {
       storage: diskStorage({
@@ -101,6 +103,7 @@ export class ProductController {
   }
 
   @Post('update/:id')
+  @UseGuards(AuthGuard)
   @UseInterceptors(
     FileInterceptor('image', {
       storage: diskStorage({
@@ -240,6 +243,7 @@ async findAll(
   }
 
   @Delete('delete/:id')
+  @UseGuards(AuthGuard)
   async remove(@Param('id') id: string) {
     try {
       const product = await this.productService.findOne(+id);
